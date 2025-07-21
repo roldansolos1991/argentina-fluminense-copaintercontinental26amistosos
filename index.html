@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Argentina vs Fluminense - En Vivo</title>
+  <style>
+    body { font-family: Arial, sans-serif; text-align:center; padding:20px; background:#f5f5f5; }
+    .container { max-width:500px; margin:auto; background:#fff; padding:20px; border-radius:10px; box-shadow:0 0 10px rgba(0,0,0,0.1);}
+    h1 { color:#1a73e8; }
+    .score { font-size:2em; margin:10px 0; }
+    .goal { margin:5px 0; }
+    .hidden { display:none; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Argentina vs Fluminense</h1>
+    <div id="status">🕓 Esperando al inicio del partido (16:00)...</div>
+    <div id="clock" class="hidden">00:00</div>
+    <div class="score hidden" id="score">Argentina 0 - 0 Fluminense</div>
+    <div id="goals"></div>
+  </div>
+
+  <script>
+    const startHour = 16;
+    const startMinute = 0;
+    const duration = 23; // 20 min + 3 de agregado
+    const goals = [
+      { minute: 3, team: "Argentina", player: "Roldán" },
+      { minute: 7, team: "Argentina", player: "Shadow" },
+      { minute: 10, team: "Argentina", player: "Shadow" },
+      { minute: 12, team: "Fluminense", player: "DiNatale" },
+      { minute: 15, team: "Argentina", player: "Roldán" },
+      { minute: 21, team: "Argentina", player: "Roldán (Tiro libre)" }
+    ];
+
+    const status = document.getElementById("status");
+    const clock = document.getElementById("clock");
+    const scoreBoard = document.getElementById("score");
+    const goalsContainer = document.getElementById("goals");
+
+    let argentinaGoals = 0;
+    let fluGoals = 0;
+
+    function updateGame() {
+      const now = new Date();
+      const gameStart = new Date();
+      gameStart.setHours(startHour);
+      gameStart.setMinutes(startMinute);
+      gameStart.setSeconds(0);
+
+      const elapsedMs = now - gameStart;
+      const elapsedMinutes = Math.floor(elapsedMs / 60000);
+      const elapsedSeconds = Math.floor((elapsedMs % 60000) / 1000);
+
+      if (elapsedMs < 0) {
+        status.textContent = "🕓 Esperando al inicio del partido (16:00)...";
+        clock.classList.add("hidden");
+        scoreBoard.classList.add("hidden");
+        return;
+      }
+
+      status.classList.add("hidden");
+      clock.classList.remove("hidden");
+      scoreBoard.classList.remove("hidden");
+
+      const minStr = elapsedMinutes < 10 ? "0" + elapsedMinutes : elapsedMinutes;
+      const secStr = elapsedSeconds < 10 ? "0" + elapsedSeconds : elapsedSeconds;
+      clock.textContent = minStr + ":" + secStr;
+
+      goals.forEach(goal => {
+        if (!goal.shown && goal.minute <= elapsedMinutes) {
+          const goalDiv = document.createElement("div");
+          goalDiv.classList.add("goal");
+          goalDiv.textContent = `Minuto ${goal.minute}' Gol de ${goal.player} (${goal.team})`;
+          goalsContainer.appendChild(goalDiv);
+          goal.shown = true;
+
+          if (goal.team === "Argentina") argentinaGoals++;
+          else fluGoals++;
+
+          scoreBoard.textContent = `Argentina ${argentinaGoals} - ${fluGoals} Fluminense`;
+        }
+      });
+
+      if (elapsedMinutes >= duration) {
+        clearInterval(timer);
+      }
+    }
+
+    const timer = setInterval(updateGame, 1000);
+  </script>
+</body>
+</html>
